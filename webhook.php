@@ -1,5 +1,5 @@
 <?php
-    require_once './salesforceAuth.php';
+    require_once './salesforceMainClass.php';
     // $headers = getallheaders();
 
     $salesForce = new SalesForce();

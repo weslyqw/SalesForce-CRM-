@@ -1,5 +1,5 @@
 <?php
-    require_once './salesforceAuth.php';
+    require_once './salesforceMainClass.php';
 
     $salesForce = new SalesForce();
     $data = file_get_contents('https://echo-webhook.herokuapp.com/leadTrigger');
