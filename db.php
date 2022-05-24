@@ -50,24 +50,46 @@
             ?>
         </style>
 <?php
- 
-    // From URL to get webpage contents.
-    // $url = "https://app.whatconverts.com/api/v1/";
-     
-    // Initialize a CURL session.
-    // $ch = curl_init();
-    // curl -u 97649-a5b2cdb272d759b4:6f55f2dd386a95a0de9a161308eae1bb    
-    // // Return Page contents.
-    // curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
-     
-    // //grab URL and pass it to the variable.
-    // curl_setopt($ch, CURLOPT_URL, $url);
-     
-    // $result = curl_exec($ch);
-     
-    // echo $result;
-     
     } else {
         echo "Error: " . $sql . "<br>" . $conn->error;
     }
 ?>
+<script src="https://code.jquery.com/jquery-3.4.1.js" integrity="sha256-WpOohJOqMqqyKL9FccASB9O0KwACQJpFTUBLTYOVvVU=" crossorigin="anonymous"></script>   
+
+<script>
+
+$.ajax({
+   url: 'salesforceContactWebhook.php',
+   type: 'POST',
+   dataType : 'json',
+   success : function (result) 
+   {
+      console.log (result) // Here, you need to use response by PHP file.
+   },
+   error : function () 
+   {
+      console.log ('error')
+   }
+
+});
+
+</script>
+
+<script>
+
+$.ajax({
+   url: 'salesforceOpportunityWebhook.php',
+   type: 'POST',
+   dataType : 'json',
+   success : function (result) 
+   {
+      console.log (result) // Here, you need to use response by PHP file.
+   },
+   error : function () 
+   {
+      console.log ('error')
+   }
+
+});
+
+</script>
