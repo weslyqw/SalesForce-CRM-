@@ -2,12 +2,10 @@
 
 A PHP interface for the WhatConverts API at https://www.whatconverts.com/api
 
-[![Build Status](https://travis-ci.org/andrew501983/what-converts-php.svg?branch=master)](https://travis-ci.org/andrew501983/what-converts-php)
-
 ## Installation via Composer
 
 Install the latest version using [Composer](https://getcomposer.org/).
-composer require andrew501983/what-converts-php
+
 
 ## Usage
 
@@ -33,10 +31,6 @@ WhatConverts PHP implements a WhatConvertsInterface which allows for easy docume
     public function createProfile($account_id, $profile_name);
     public function editProfile($account_id, $profile_id, $profile_name);
     public function deleteProfile($account_id, $profile_id);
-
-## Contributing
-
-Bug reports and pull requests are welcome on GitHub at https://github.com/andrew501983/what-converts-php
 
 ## License
 
