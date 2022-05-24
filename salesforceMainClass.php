@@ -12,6 +12,8 @@
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($Curl, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($Curl, CURLOPT_TIMEOUT, 10);
 
             $headers = array(
                "Content-Type: application/x-www-form-urlencoded",
@@ -22,15 +24,12 @@
         
             curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
         
-            //for debug only!
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-        
             $resp = curl_exec($curl);
             $resp = json_decode($resp, true);
             $salesForceAccessToken = ($resp['access_token']);
-            return $salesForceAccessToken;
             curl_close($curl);
+            return $salesForceAccessToken;
+            
         
             
         }
@@ -41,20 +40,21 @@
             $curl = curl_init($url);
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($Curl, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($Curl, CURLOPT_TIMEOUT, 10);
 
             $headers = array(
                "Authorization: Bearer ".$salesForceAccessToken,
             );
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-            //for debug only!
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-
+            
+            
             $resp = curl_exec($curl);
             $resp = json_decode($resp, true);
+            curl_close($curl);
 
             if (!($resp[0]['errorCode'])){
-                $this->$_lead_found = true;
+                $this->_lead_found = true;
                 echo "lead found in sales Force \n";
             } else {
                 echo "lead not found ". "\n";
@@ -64,26 +64,20 @@
 
             if (!($this->_lead_found) && (!($this->_contact_found)) && (!($this->_oppertunity_found))){
                 $addational_field = "Pending";
-                setWcSalesForceField($leadId,$addational_field);
-                $this->setSalesForeceLeadNumber($leadId,$email,$salesForceAccessToken);
+                $this->setWcSalesForceField($leadId,$addational_field);
 
             } else if(($this->_lead_found) || ($this->_contact_found)){
                 $addational_field = "Connected";
                 
-                setWcSalesForceField($leadId,$addational_field);
+                $this->setWcSalesForceField($leadId,$addational_field);
+                $this->setSalesForeceLeadNumber($leadId,$email,$salesForceAccessToken);
 
                 if($this->_contact_found){
                     $wcQuotable = "Yes";
                     $this->setWcQuotable($wcQuotable,$leadId);
 
                 }
-            } else if($this->_oppertunity_found){
-
             }
-
-            curl_close($curl);
-            
-
         }
         
         private function getSalesForceContactSearch($email,$salesForceAccessToken){
@@ -93,17 +87,17 @@
             $curl = curl_init($url);
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($Curl, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($Curl, CURLOPT_TIMEOUT, 10);
 
             $headers = array(
                "Authorization: Bearer ".$salesForceAccessToken,
             );
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-            //for debug only!
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-
+            
             $resp = curl_exec($curl);
             $resp = json_decode($resp, true);
+            curl_close($curl);
 
             if (!($resp[0]['errorCode'])){
                 $this->_contact_found = true;
@@ -116,7 +110,7 @@
             }
 
 
-            curl_close($curl);
+            
             
 
         }
@@ -128,17 +122,18 @@
             $curl = curl_init($url);
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($Curl, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($Curl, CURLOPT_TIMEOUT, 10);
 
             $headers = array(
                "Authorization: Bearer ".$salesForceAccessToken,
             );
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
-            //for debug only!
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-
+           
             $resp = curl_exec($curl);
             $resp = json_decode($resp, true);
+            curl_close($curl);
+
             if (!($resp[0]['errorCode'])){
                 $this->$_oppertunity_found = true;
                 echo "Opportunity found in sales Force \n";
@@ -146,21 +141,45 @@
                 echo "Opportunity not found ". '\n';
             }
 
-            curl_close($curl);
            
-
         }
 
-        public function setWcSalesForceField($leadId,$addational_field){
+        public function getSalesForceContactByAccountId($email,$salesForceAccessToken){
+
+            $url = "https://whatconverts-dev-ed.my.salesforce.com/services/data/v54.0/sobjects/Contact/Email/$email";
+
+            $curl = curl_init($url);
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($Curl, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($Curl, CURLOPT_TIMEOUT, 10);
+
+            $headers = array(
+               "Authorization: Bearer ".$salesForceAccessToken,
+            );
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+          
+            $resp = curl_exec($curl);
+            $resp = json_decode($resp, true);
+            curl_close($curl);
+
+            $wcLeadId = $resp['Fax'];
+            
+            return $wcLeadId;
+        }
+
+        private function setWcSalesForceField($leadId,$addational_field){
             $url = "https://app.whatconverts.com/api/v1/leads/$leadId";
 
             $curl = curl_init($url);
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($Curl, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($Curl, CURLOPT_TIMEOUT, 10);
             
             $headers = array(
-               "Authorization: Basic OTc2NDktNTgxMjY5ZjFlNWM1OTg3YzoyNWUwZDU3Y2RkMGVjYWQyMjFmZjNhOGY3ZDMxYmI2NA==",
+               "Authorization: Basic OTc2NDktZDBiMTI0NzUxNzU0NDhiZDo3NjE5ZmIyNjIxNDdjNzI0NWI5ZDM2YzRlYTE0MDE0OQ==",
                "Content-Type: application/x-www-form-urlencoded",
             );
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
@@ -169,25 +188,23 @@
             
             curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
             
-            //for debug only!
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
-            
             $resp = curl_exec($curl);
             curl_close($curl);
             
         }
         
-        private function setWcQuotable($wcQuotable,$leadId){
+        public function setWcQuotable($wcQuotable,$leadId){
             $url = "https://app.whatconverts.com/api/v1/leads/$leadId";
 
             $curl = curl_init($url);
             curl_setopt($curl, CURLOPT_URL, $url);
             curl_setopt($curl, CURLOPT_POST, true);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($Curl, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($Curl, CURLOPT_TIMEOUT, 10);
             
             $headers = array(
-               "Authorization: Basic OTc2NDktNTgxMjY5ZjFlNWM1OTg3YzoyNWUwZDU3Y2RkMGVjYWQyMjFmZjNhOGY3ZDMxYmI2NA==",
+               "Authorization: Basic OTc2NDktZDBiMTI0NzUxNzU0NDhiZDo3NjE5ZmIyNjIxNDdjNzI0NWI5ZDM2YzRlYTE0MDE0OQ==",
                "Content-Type: application/x-www-form-urlencoded",
             );
             curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
@@ -196,13 +213,59 @@
             
             curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
             
-            //for debug only!
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            $resp = curl_exec($curl);
+            curl_close($curl);
+            
+        }
+        
+        public function setWcQuoteValue($leadId,$opportunityAmount){
+            $url = "https://app.whatconverts.com/api/v1/leads/$leadId";
+
+            $curl = curl_init($url);
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($Curl, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($Curl, CURLOPT_TIMEOUT, 10);
+            
+            $headers = array(
+               "Authorization: Basic OTc2NDktZDBiMTI0NzUxNzU0NDhiZDo3NjE5ZmIyNjIxNDdjNzI0NWI5ZDM2YzRlYTE0MDE0OQ==",
+               "Content-Type: application/x-www-form-urlencoded",
+            );
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+            
+            $data = "quote_value=$opportunityAmount";
+            
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+            
             
             $resp = curl_exec($curl);
             curl_close($curl);
             
+        }
+        
+        public function setWcSalesVlaue($leadId,$opportunityAmount){
+            $url = "https://app.whatconverts.com/api/v1/leads/$leadId";
+
+            $curl = curl_init($url);
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($Curl, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($Curl, CURLOPT_TIMEOUT, 10);
+            
+            $headers = array(
+               "Authorization: Basic OTc2NDktZDBiMTI0NzUxNzU0NDhiZDo3NjE5ZmIyNjIxNDdjNzI0NWI5ZDM2YzRlYTE0MDE0OQ==",
+               "Content-Type: application/x-www-form-urlencoded",
+            );
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+            
+            $data = "sales_value=$opportunityAmount";
+            
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+            
+            $resp = curl_exec($curl);
+            curl_close($curl);
         }
 
         private function setSalesForeceLeadNumber($leadId,$email,$salesForceAccessToken){
@@ -210,8 +273,9 @@
 
             $curl = curl_init($url);
             curl_setopt($curl, CURLOPT_URL, $url);
-            curl_setopt($curl, CURLOPT_PATCH, true);
             curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($Curl, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($Curl, CURLOPT_TIMEOUT, 10);
 
             $headers = array(
                "Authorization: Bearer .$salesForceAccessToken",
@@ -221,16 +285,41 @@
 
             $data = <<<DATA
             {
-              "Description":$leadId
+              "Fax":$leadId
             }
             DATA;
 
             curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
             curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PATCH');
 
-            //for debug only!
-            curl_setopt($curl, CURLOPT_SSL_VERIFYHOST, false);
-            curl_setopt($curl, CURLOPT_SSL_VERIFYPEER, false);
+            $resp = curl_exec($curl);
+            curl_close($curl);
+
+        }
+        
+        public function setContactEmailIdentifier($email,$salesForceAccessToken){
+            $url = "https://whatconverts-dev-ed.my.salesforce.com/services/data/v54.0/sobjects/Contact/Email/$email";
+
+            $curl = curl_init($url);
+            curl_setopt($curl, CURLOPT_URL, $url);
+            curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+            curl_setopt($Curl, CURLOPT_CONNECTTIMEOUT, 10);
+            curl_setopt($Curl, CURLOPT_TIMEOUT, 10);
+
+            $headers = array(
+               "Authorization: Bearer .$salesForceAccessToken",
+               "Content-Type: application/json",
+            );
+            curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+            $data = <<<DATA
+            {
+              "Description":"$email"
+            }
+            DATA;
+
+            curl_setopt($curl, CURLOPT_POSTFIELDS, $data);
+            curl_setopt($curl, CURLOPT_CUSTOMREQUEST, 'PATCH');
 
             $resp = curl_exec($curl);
             curl_close($curl);
