@@ -2,14 +2,19 @@
     require_once './salesforceMainClass.php';
 
     $salesForce = new SalesForce();
-    $data = file_get_contents('');
-    print_r($data);
-    $dataFile = fopen("datasf.txt", "w");
+    $data = json_decode(file_get_contents('https://echo-webhook.herokuapp.com/OpportunityWebhook'), true);
 
     try {
-            var_dump($data);
-            
-            fwrite($dataFile,$data);
+            $salesForceAccountEmail = $data['new'][0]['Description'];
+            $opportunityAmount = $data['new'][0]['Amount'];
+            $stageName = $data['new'][0]['StageName'];
+            $salesForceAccessToken = $salesForce->getSalesForceAccessToken();
+
+            $wcLeadId = $salesForce->getSalesForceContactByAccountId($salesForceAccountEmail,$salesForceAccessToken);
+            $salesForce->setWcQuoteValue($wcLeadId,$opportunityAmount);
+            if ($stageName == "Closed Won"){
+                $result=$salesForce->setWcSalesVlaue($wcLeadId,$opportunityAmount);
+            }
         } catch (\Throwable $th) {
             echo "Error / " . $th->getMessage();
         } 
