@@ -8,7 +8,7 @@
 
     try {
             var_dump($data);
-            
+            echo ("YES ITS RUNNING HERE ALSO!!!!!!!");
             fwrite($dataFile,$data);
         } catch (\Throwable $th) {
             echo "Error / " . $th->getMessage();
